@@ -1,0 +1,58 @@
+services:
+  mssql1:
+    image: mssql-server-custom
+    container_name: sql1
+    hostname: sql1
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password1  # Passwort für den ersten SQL Server Container
+      - MSSQL_AGENT_ENABLED=True        # SQL Server Agent aktivieren
+    ports:
+      - "1433:1433"  # Standardport für den ersten SQL Server
+    networks:
+      - mssql_network
+    volumes:
+      - ./path/to/replication:/var/opt/mssql/ReplData
+      - ./sql-script1/init.sql:/docker-entrypoint-initdb.d/init.sql # Bindet die SQL-Datei ein
+
+    # command: >
+    #   /bin/bash -c "
+    #   /opt/mssql/bin/sqlservr &
+    #   sleep 20 &&
+    #   /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -d master -i /init.sql &&
+    #   wait"
+    # command: >
+    #   /bin/bash -c "
+    #   /opt/mssql/bin/sqlservr &
+    #   sleep 17 &&
+    #   ls /sql-scripts && 
+    #   /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -i /sql-scripts/script-server1.sql &&
+    #   pkill sqlservr &&
+    #   /opt/mssql/bin/sqlservr
+    #   "
+
+  mssql2:
+    image: mssql-server-custom
+    container_name: sql2
+    hostname: sql2
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password1  # Passwort für den zweiten SQL Server Container
+      - MSSQL_AGENT_ENABLED=True        # SQL Server Agent aktivieren
+      - MSSQL_TCP_PORT=1444 # Setzt den internen Port auf 1444
+    ports:
+      - "1444:1444"  # Verwende einen anderen Port für den zweiten SQL Server (beachten Sie, dass Port 1434 auf dem Host gemappt wird)
+    networks:
+      - mssql_network
+    volumes:
+      - ./sql-scripts:/sql-scripts
+
+networks:
+  mssql_network:
+    driver: bridge
+
+volumes:
+  mssql_data_1:
+    driver: local
+  mssql_data_2:
+    driver: local

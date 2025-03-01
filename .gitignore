@@ -1,0 +1,8 @@
+# Ignoriere den Debug-Ordner
+Application/BachelorWebApp/BachelorWebApp/bin/Debug
+
+Application/BachelorWebApp/BachelorWebApp/obj/Debug
+
+Application/BachelorWebApp/BachelorWebApp/obj
+
+merge replikation/path

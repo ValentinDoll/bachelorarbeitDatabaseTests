@@ -1,0 +1,61 @@
+services:
+  mssql1:
+    image: mssql-server-custom
+    container_name: sql1
+    hostname: sql1
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password1
+    ports:
+      - "1433:1433"  
+    networks:
+      - mssql_network
+    volumes:
+      - ./sql-scripts:/sql-scripts 
+    command: >
+      /bin/bash -c "
+      /opt/mssql/bin/sqlservr &  
+      until /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -Q 'SELECT 1' > /dev/null 2>&1; do
+        echo 'Waiting for SQL Server to start...';
+        sleep 3;
+      done;
+      sleep 5;
+      echo 'SQL Server ist bereit. Führe SQL-Skript aus...';
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -i /sql-scripts/script-server1.sql;
+      wait
+      "
+
+  mssql2:
+    image: mssql-server-custom
+    container_name: sql2
+    hostname: sql2
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password1
+    ports:
+      - "1444:1433"
+    networks:
+      - mssql_network
+    volumes:
+      - ./sql-scripts:/sql-scripts
+    command: >
+      /bin/bash -c "
+      /opt/mssql/bin/sqlservr &  
+      until /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -Q 'SELECT 1' > /dev/null 2>&1; do
+        echo 'Waiting for SQL Server to start...';
+        sleep 3;
+      done;
+      echo 'SQL Server ist bereit. Führe SQL-Skript aus...';
+      /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Password1 -i /sql-scripts/script-server2.sql;
+      wait
+      "
+
+networks:
+  mssql_network:
+    driver: bridge
+
+volumes:
+  mssql_data_1:
+    driver: local
+  mssql_data_2:
+    driver: local
